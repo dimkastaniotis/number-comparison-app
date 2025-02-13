@@ -1,10 +1,21 @@
 from flask import Flask, render_template, request, send_file
+import matplotlib
+matplotlib.use('Agg')  # Set the backend to 'Agg'
 import matplotlib.pyplot as plt
 import io
 import numpy as np
 import os
 
+# Before creating the app instance:
+os.environ['MPLCONFIGDIR'] = os.path.join(os.getcwd(), ".matplotlib")
+
 app = Flask(__name__)
+
+# Create .matplotlib directory if it doesn't exist
+matplotlib_cache_dir = os.environ['MPLCONFIGDIR']
+if not os.path.exists(matplotlib_cache_dir):
+    os.makedirs(matplotlib_cache_dir)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def quadratic_graph():
@@ -17,7 +28,7 @@ def quadratic_graph():
             c = float(request.form['c'])
 
             # Create the graph
-            img = create_graph(a, b, c)
+            create_graph(a, b, c)
             graph_url = 'static/graph.png'  # Assuming create_graph saves to graph.png
 
         except ValueError:
@@ -41,7 +52,6 @@ def create_graph(a, b, c):
     graph_path = os.path.join(app.root_path, 'static', 'graph.png')
     plt.savefig(graph_path)
     plt.close() # Close the plot to free memory
-    return graph_path  # Return the path to the saved image
 
 
 if __name__ == '__main__':
